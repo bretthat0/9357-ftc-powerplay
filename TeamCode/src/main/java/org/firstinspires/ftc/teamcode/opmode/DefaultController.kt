@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.opmode
 
 import org.firstinspires.ftc.teamcode.opmode.base.ControllerBase
 import org.firstinspires.ftc.teamcode.subsystem.DriveSubsystem
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 
+@TeleOp
 class DefaultController: ControllerBase() {
     private val driveSubsystem = DriveSubsystem(hardwareMap)
 
