@@ -7,6 +7,17 @@ import java.util.*
 abstract class OpModeBase: OpMode() {
     private val subsystems = ArrayList<SubsystemBase>()
 
+    abstract fun onInit()
+    open fun onLoop() {}
+
+    override fun init() {
+        onInit()
+    }
+
+    override fun loop() {
+        onLoop()
+    }
+
     fun register(subsystem: SubsystemBase) {
         subsystems.add(subsystem)
         subsystem.onRegister()

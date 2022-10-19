@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.util.*
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.HardwareMap
 
-class DriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
+class BallDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     var leftInput = Vector2.zero
     var rightInput = Vector2.zero
 

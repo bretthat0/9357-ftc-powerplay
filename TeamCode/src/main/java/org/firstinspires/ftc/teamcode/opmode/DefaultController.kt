@@ -1,29 +1,44 @@
 package org.firstinspires.ftc.teamcode.opmode
 
 import org.firstinspires.ftc.teamcode.opmode.base.ControllerBase
-import org.firstinspires.ftc.teamcode.subsystem.DriveSubsystem
+import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.Gamepad
+import org.firstinspires.ftc.teamcode.subsystem.ArmSubsystem
 
-@TeleOp
+@TeleOp(name = "Default Controller")
 class DefaultController: ControllerBase() {
-    private val driveSubsystem = DriveSubsystem(hardwareMap)
+    private lateinit var mecanumSubsystem: MecanumDriveSubsystem
+    private lateinit var armSubsystem: ArmSubsystem
 
-    override fun init() {
-        register(driveSubsystem)
+    override fun onInit() {
+        mecanumSubsystem = MecanumDriveSubsystem(hardwareMap)
+        armSubsystem = ArmSubsystem(hardwareMap)
+
+        // register(mecanumSubsystem)
+        register(armSubsystem)
     }
 
-    override fun loop() {
-        driveSubsystem.leftInput = gamepad1.leftStick
-        driveSubsystem.rightInput = gamepad1.rightStick
+    override fun onLoop() {
+        drive()
+        arm()
 
-        runEvents()
-        executeSubsystems()
+        telemetry.addLine(""+armSubsystem.velocity)
+        telemetry.update()
     }
 
-    override fun onButtonReleased(gamepad: Gamepad, button: GamepadButton) {
-        if (button == GamepadButton.A) {
-            stop()
-        }
+    private fun drive() {
+        mecanumSubsystem.leftInput = gamepad1.leftStick
+        mecanumSubsystem.rightInput = gamepad1.rightStick
+    }
+
+    private fun arm() {
+        armSubsystem.extendPos = if (gamepad1.a) 300 else 0
+
+        if (gamepad1.x)
+            armSubsystem.pivotPower = 1.0
+        else if (gamepad1.y)
+            armSubsystem.pivotPower = -1.0
+
+        armSubsystem.rotatePower = gamepad1.triggerAxis
     }
 }

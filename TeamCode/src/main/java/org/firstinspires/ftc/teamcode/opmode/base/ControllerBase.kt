@@ -9,23 +9,23 @@ abstract class ControllerBase: OpModeBase() {
     }
 
     data class GamepadSnapshot(
-        val x: Boolean,
-        val y: Boolean,
-        val a: Boolean,
-        val b: Boolean,
-        val left_bumper: Boolean,
-        val right_bumper: Boolean,
-        val left_stick_button: Boolean,
-        val right_stick_button: Boolean,
-        val dpad_up: Boolean,
-        val dpad_down: Boolean,
-        val dpad_left: Boolean,
-        val dpad_right: Boolean,
-        val back: Boolean,
-        val start: Boolean,
+        val x: Boolean = false,
+        val y: Boolean = false,
+        val a: Boolean = false,
+        val b: Boolean = false,
+        val left_bumper: Boolean = false,
+        val right_bumper: Boolean = false,
+        val left_stick_button: Boolean = false,
+        val right_stick_button: Boolean = false,
+        val dpad_up: Boolean = false,
+        val dpad_down: Boolean = false,
+        val dpad_left: Boolean = false,
+        val dpad_right: Boolean = false,
+        val back: Boolean = false,
+        val start: Boolean = false,
     )
 
-    val Gamepad.snapshot
+    private val Gamepad.snapshot
         get() = GamepadSnapshot(
             this.x,
             this.y,
@@ -48,18 +48,29 @@ abstract class ControllerBase: OpModeBase() {
     val Gamepad.rightStick
         get() = vec2(this.right_stick_x, this.right_stick_y)
 
-    private var snapshot1 = gamepad1.snapshot
-    private var snapshot2 = gamepad2.snapshot
+    val Gamepad.bumperAxis
+        get() = if (this.right_bumper) 1.0 else 0.0 - if (this.left_bumper) 1.0 else 0.0
+    val Gamepad.triggerAxis
+        get() = (this.right_trigger - this.left_trigger).toDouble()
+
+    private var snapshot1 = GamepadSnapshot()
+    private var snapshot2 = GamepadSnapshot()
+
+    final override fun loop() {
+        onLoop()
+        runEvents()
+        executeSubsystems()
+    }
 
     open fun onButtonPressed(gamepad: Gamepad, button: GamepadButton) {}
     open fun onButtonReleased(gamepad: Gamepad, button: GamepadButton) {}
 
-    fun runEvents() {
-        gamepad1.processEvents(snapshot1)
-        gamepad2.processEvents(snapshot2)
+    private fun runEvents() {
+        gamepad1?.processEvents(snapshot1)
+        gamepad2?.processEvents(snapshot2)
 
-        snapshot1 = gamepad1.snapshot
-        snapshot2 = gamepad2.snapshot
+        if (gamepad1 != null) snapshot1 = gamepad1.snapshot
+        if (gamepad2 != null) snapshot2 = gamepad2.snapshot
     }
 
     private fun Gamepad.processEvents(snapshot: GamepadSnapshot) {
