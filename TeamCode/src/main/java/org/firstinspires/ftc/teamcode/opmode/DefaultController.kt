@@ -22,7 +22,8 @@ class DefaultController: ControllerBase() {
         drive()
         arm()
 
-        telemetry.addLine(""+armSubsystem.velocity)
+        telemetry.addLine("Game harder >:(")
+        telemetry.addLine("Measured pivot velocity: ${armSubsystem.velocity}")
         telemetry.update()
     }
 
@@ -32,13 +33,10 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        armSubsystem.extendPos = if (gamepad1.a) 300 else 0
+        armSubsystem.extendPos = if (gamepad1.a) 100 else 0
 
-        if (gamepad1.x)
-            armSubsystem.pivotPower = 1.0
-        else if (gamepad1.y)
-            armSubsystem.pivotPower = -1.0
+        armSubsystem.pivotPos = if (gamepad1.x) 1000 else 0
 
-        armSubsystem.rotatePower = gamepad1.triggerAxis
+        armSubsystem.rotatePos = (gamepad1.triggerAxis * 200).toInt()
     }
 }

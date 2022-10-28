@@ -9,12 +9,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     var extendPos = 0
-
-    var pivotPower = 0.0
-    var rotatePower = 0.0
+    var pivotPos = 0
+    var rotatePos = 0
 
     val velocity
-        get() = extendMotor.power
+        get() = pivotMotor.velocity
 
     private lateinit var extendMotor: DcMotorEx
     private lateinit var pivotMotor: DcMotorEx
@@ -25,36 +24,55 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         pivotMotor = hardwareMap.get(DcMotorEx::class.java, "pivot_motor")
         rotateMotor = hardwareMap.get(DcMotorEx::class.java, "rotate_motor")
 
-        extendMotor.direction = DcMotorSimple.Direction.REVERSE
+        pivotMotor.direction = DcMotorSimple.Direction.REVERSE
+
+        extendMotor.power = 0.0
+        pivotMotor.power = 0.0
+        rotateMotor.power = 0.0
+
+        extendMotor.velocity = 0.0
+        pivotMotor.velocity = 0.0
+        rotateMotor.velocity = 0.0
 
         extendMotor.stopAndReset()
-        pivotMotor.run()
-
-        // extendMotor.velocity = 2000.0
+        pivotMotor.stopAndReset()
+        rotateMotor.stopAndReset()
     }
 
     override fun execute() {
+        extendMotor.power = 1.0
+        pivotMotor.power = 1.0
+        rotateMotor.power = 1.0
+
         extendMotor.targetPosition = extendPos
+        pivotMotor.targetPosition = pivotPos
+        rotateMotor.targetPosition = rotatePos
 
-        if (pivotPower != 0.0) {
-            pivotMotor.power = pivotPower
-            pivotMotor.run()
-        }
-        else {
-            pivotMotor.stopAndReset()
-        }
-
-        rotateMotor.power = rotatePower
+        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED)
+        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED)
+        rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED)
     }
 
-    private fun DcMotor.stopAndReset() {
+    fun toRadiansPerMin(percent: Double): Double = percent * 2 * Math.PI * MOTOR_RPM
+
+    private fun DcMotorEx.stopAndReset() {
         this.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         this.targetPosition = 0
-        this.power = 1.0
         this.mode = DcMotor.RunMode.RUN_TO_POSITION
     }
 
-    private fun DcMotor.run() {
-        this.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+    private fun DcMotorEx.run() {
+        this.mode = DcMotor.RunMode.RUN_USING_ENCODER
+    }
+
+    companion object {
+        const val MOTOR_RPM: Double = 312.0
+        const val MAX_EXTEND_SPEED: Double = 0.5
+        const val MAX_PIVOT_SPEED: Double = 0.8
+        const val MAX_ROTATE_SPEED: Double = 0.2
+        const val EXTEND_GEAR_RATIO: Double = 19.2
+        const val PIVOT_GEAR_RATIO: Double = 263.7
+        // const val TURRET_GEAR_RATIO: Double = ?
+        // const val EXTEND_TPR: Double = ?
     }
 }
