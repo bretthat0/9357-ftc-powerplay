@@ -8,11 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
-    var extendPos = 0
-    var pivotPos = 0
-    var rotatePos = 0
+    var extendPos = 0.0
+    var pivotPos = 0.0
+    var rotatePos = 0.0
 
-    val velocity
+    val pivotVelocity
         get() = pivotMotor.velocity
 
     private lateinit var extendMotor: DcMotorEx
@@ -44,9 +44,9 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         pivotMotor.power = 1.0
         rotateMotor.power = 1.0
 
-        extendMotor.targetPosition = extendPos
-        pivotMotor.targetPosition = pivotPos
-        rotateMotor.targetPosition = rotatePos
+        extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
+        pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
+        rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
 
         extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED)
         pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED)
@@ -54,6 +54,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     fun toRadiansPerMin(percent: Double): Double = percent * 2 * Math.PI * MOTOR_RPM
+    fun toTicks(rotations: Double, tpr: Double): Int = (rotations * tpr).toInt()
 
     private fun DcMotorEx.stopAndReset() {
         this.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -72,7 +73,12 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val MAX_ROTATE_SPEED: Double = 0.2
         const val EXTEND_GEAR_RATIO: Double = 19.2
         const val PIVOT_GEAR_RATIO: Double = 263.7
-        // const val TURRET_GEAR_RATIO: Double = ?
-        // const val EXTEND_TPR: Double = ?
+        const val ROTATE_GEAR_RATIO: Double = 54.0 / 16.0
+        const val EXTEND_MOTOR_TPR: Double = 537.7
+        const val PIVOT_MOTOR_TPR: Double = 7.0 * PIVOT_GEAR_RATIO
+        const val ROTATE_MOTOR_TPR: Double = 537.7
+        const val EXTEND_TPR: Double = EXTEND_MOTOR_TPR * EXTEND_GEAR_RATIO
+        const val PIVOT_TPR: Double = PIVOT_MOTOR_TPR * PIVOT_GEAR_RATIO
+        const val ROTATE_TPR: Double = ROTATE_MOTOR_TPR * ROTATE_GEAR_RATIO
     }
 }
