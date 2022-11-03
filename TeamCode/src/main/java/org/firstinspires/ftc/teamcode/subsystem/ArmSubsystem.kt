@@ -8,12 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
-    var extendPos = 0.0
-    var pivotPos = 0.0
-    var rotatePos = 0.0
-
-    val pivotVelocity
-        get() = pivotMotor.velocity
+    var position = Vector3.zero
 
     private lateinit var extendMotor: DcMotorEx
     private lateinit var pivotMotor: DcMotorEx
@@ -44,6 +39,15 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         pivotMotor.power = 1.0
         rotateMotor.power = 1.0
 
+        val ik = DoubleJointIK(
+            vec2(position.z, position.y),
+            ARM_LENGTH / 2,
+            ARM_LENGTH / 2)
+
+        val extendPos = 0.0
+        val pivotPos = 0.0
+        val rotatePos = 0.0
+
         extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
         rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
@@ -62,10 +66,6 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         this.mode = DcMotor.RunMode.RUN_TO_POSITION
     }
 
-    private fun DcMotorEx.run() {
-        this.mode = DcMotor.RunMode.RUN_USING_ENCODER
-    }
-
     companion object {
         const val MOTOR_RPM: Double = 312.0
         const val MAX_EXTEND_SPEED: Double = 0.5
@@ -80,5 +80,6 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val EXTEND_TPR: Double = EXTEND_MOTOR_TPR * EXTEND_GEAR_RATIO
         const val PIVOT_TPR: Double = PIVOT_MOTOR_TPR * PIVOT_GEAR_RATIO
         const val ROTATE_TPR: Double = ROTATE_MOTOR_TPR * ROTATE_GEAR_RATIO
+        const val ARM_LENGTH: Double = 34.0
     }
 }
