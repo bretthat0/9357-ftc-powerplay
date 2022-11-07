@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import kotlin.math.acos
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     var position = Vector3.zero
@@ -39,13 +40,12 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         pivotMotor.power = 1.0
         rotateMotor.power = 1.0
 
-        val planarPos = vec2(0.0, 0.0) // TODO
-
+        val planarPos = vec2(vec2(position.x, position.z).magnitude, position.z)
         val ik = DoubleJointIK(planarPos, ARM_LENGTH)
 
-        val extendPos = (ik.q1 + ik.q2)
-        val pivotPos = ik.q1 / (2 * Math.PI)
-        val rotatePos = 0.0 // TODO
+        val extendPos = toRevolutions(ik.q1 + ik.q2)
+        val pivotPos = toRevolutions(ik.q1)
+        val rotatePos = toRevolutions(acos((position dot Vector3.forward) / position.magnitude))
 
         extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
@@ -57,7 +57,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     private fun toRadiansPerMin(percent: Double): Double = percent * 2 * Math.PI * MOTOR_RPM
-    private fun toTicks(rotations: Double, tpr: Double): Int = (rotations * tpr).toInt()
+    private fun toRevolutions(radians: Double): Double = radians / (2 * Math.PI)
+    private fun toTicks(revolutions: Double, tpr: Double): Int = (revolutions * tpr).toInt()
 
     private fun DcMotorEx.stopAndReset() {
         this.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER

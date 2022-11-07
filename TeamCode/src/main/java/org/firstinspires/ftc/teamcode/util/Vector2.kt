@@ -8,6 +8,8 @@ fun vec2(x: Float, y: Float) = Vector2(x.toDouble(), y.toDouble())
 data class Vector2(var x: Double, var y: Double) {
     companion object {
         val zero = Vector2(0.0, 0.0)
+        val right = Vector2(1.0, 0.0)
+        val up = Vector2(0.0, 1.0)
     }
 
     var xF: Float
