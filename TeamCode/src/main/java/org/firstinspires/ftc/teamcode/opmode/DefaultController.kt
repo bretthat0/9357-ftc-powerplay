@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.opmode.base.ControllerBase
 import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystem.ArmSubsystem
+import org.firstinspires.ftc.teamcode.util.vec3
 
 @TeleOp(name = "Default Controller")
 class DefaultController: ControllerBase() {
@@ -23,6 +24,7 @@ class DefaultController: ControllerBase() {
         arm()
 
         telemetry.addLine("Game harder >:(")
+        armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
 
@@ -32,6 +34,7 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        // TODO
+        // Move 6 inches forward
+        armSubsystem.position = vec3(0.0, 10.0, 10.0)
     }
 }

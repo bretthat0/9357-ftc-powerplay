@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.util
 
 import kotlin.math.sqrt
+import kotlin.math.abs
 
 fun vec3(x: Double, y: Double, z: Double) = Vector3(x, y, z)
 fun vec3(x: Float, y: Float, z: Float) = Vector3(x.toDouble(), y.toDouble(), z.toDouble())
+
+fun abs(vector: Vector3) = vec3(abs(vector.x), abs(vector.y), abs(vector.z))
 
 data class Vector3(var x: Double, var y: Double, var z: Double) {
     companion object {
