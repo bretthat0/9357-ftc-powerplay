@@ -1,32 +1,39 @@
 package org.firstinspires.ftc.teamcode.opmode.base
 
 import kotlinx.coroutines.*
+import kotlin.concurrent.thread
 
 abstract class AutoBase: OpModeBase() {
-    private lateinit var startJob: Job
+    var isRunning: Boolean = false
+        private set
 
     open suspend fun onStart() {}
     open fun onStop() {}
 
     override fun start() {
-        runBlocking {
-            startJob = launch {
-                onStart()
+        thread {
+            runBlocking {
+                launch {
+                    isRunning = true
+                    onStart()
+                }
             }
         }
     }
 
     override fun stop() {
-        startJob.cancel()
+        isRunning = false;
         onStop()
     }
 
     suspend fun wait(seconds: Double) {
-        delay((seconds / 1000).toLong())
+        if (isRunning) {
+            delay((seconds / 1000).toLong())
+        }
     }
 
     suspend fun waitUntil(until: () -> Boolean) {
-        while (!until()) {
+        while (!until() && isRunning) {
             delay(10)
         }
     }

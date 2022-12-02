@@ -1,28 +1,30 @@
 package org.firstinspires.ftc.teamcode.opmode
 
 import org.firstinspires.ftc.teamcode.opmode.base.AutoBase
-import org.firstinspires.ftc.teamcode.subsystem.BallDriveSubsystem
 import org.firstinspires.ftc.teamcode.util.*
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
+import org.firstinspires.ftc.teamcode.subsystem.VisionSubsystem
 
 @Autonomous(name="Default Auto")
 class DefaultAuto: AutoBase() {
-    private lateinit var driveSubsystem: BallDriveSubsystem
+    // private lateinit var driveSubsystem: MecanumDriveSubsystem
+    private lateinit var visionSubsystem: VisionSubsystem
 
     override fun onInit() {
-        driveSubsystem = BallDriveSubsystem(hardwareMap)
+        // driveSubsystem = BallDriveSubsystem(hardwareMap)
+        visionSubsystem = VisionSubsystem(hardwareMap)
 
         // register(driveSubsystem)
+        register(visionSubsystem)
     }
 
     override suspend fun onStart() {
-        driveTime(Direction.FORWARD, 10.0)
-        // drive(Direction.LEFT, 50.0)
-    }
+        while (isRunning) {
+            wait(0.1)
 
-    private suspend fun driveTime(dir: Direction, time: Double) {
-        driveSubsystem.leftInput = dir.toVector2()
-        wait(time)
-        driveSubsystem.leftInput = Vector2.zero
+            visionSubsystem.doTelemetry(telemetry)
+            telemetry.update()
+        }
     }
 }
