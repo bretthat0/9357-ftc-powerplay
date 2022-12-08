@@ -22,7 +22,7 @@ class DefaultController: ControllerBase() {
 
     override fun onLoop() {
         drive()
-        arm()
+        arm();
 
         telemetry.addLine("Game harder >:(")
         armSubsystem.doTelemetry(telemetry)
@@ -35,6 +35,8 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        armSubsystem.position = vec3(0.0, 10.0, 10.0)
+        //armSubsystem.position = vec3(0.0, 10.0, 10.0)
+        armSubsystem.extendVelocity = gamepad1.triggerAxis
+        armSubsystem.pivotVelocity = gamepad1.bumperAxis
     }
 }
