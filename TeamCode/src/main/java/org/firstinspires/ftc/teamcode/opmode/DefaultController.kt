@@ -16,6 +16,8 @@ class DefaultController: ControllerBase() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
         armSubsystem = ArmSubsystem(hardwareMap)
 
+        armSubsystem.mode = ArmSubsystem.Mode.Manual
+
         register(driveSubsystem)
         register(armSubsystem)
     }
@@ -36,7 +38,15 @@ class DefaultController: ControllerBase() {
 
     private fun arm() {
         //armSubsystem.position = vec3(0.0, 10.0, 10.0)
-        armSubsystem.extendVelocity = gamepad1.triggerAxis
-        armSubsystem.pivotVelocity = gamepad1.bumperAxis
+
+        armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * DT
+        armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * DT
+
+        armSubsystem.wristPosition = if (gamepad1.x) 0.25 else 0.0
+        armSubsystem.isGrabbing = gamepad1.a
+    }
+
+    companion object {
+        const val DT: Double = 0.025
     }
 }

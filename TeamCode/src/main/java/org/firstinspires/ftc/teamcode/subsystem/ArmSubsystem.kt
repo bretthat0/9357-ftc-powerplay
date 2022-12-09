@@ -1,36 +1,47 @@
 package org.firstinspires.ftc.teamcode.subsystem
 
+import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.subsystem.base.SubsystemBase
 import org.firstinspires.ftc.teamcode.util.*
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.math.acos
 
-class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode = Mode.ToPosition): SubsystemBase() {
+class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     enum class Mode {
-        ToPosition, Manual
+        WorldSpace, Manual
     }
 
-    // ToPosition
+    var mode = Mode.WorldSpace
+
+    // WorldSpace
     var position = Vector3.zero
+
     // Manual
-    var extendVelocity = 0.0
-    var pivotVelocity = 0.0
-    var rotateVelocity = 0.0
+    var extendPosition = 0.0
+    var pivotPosition = 0.0
+    var rotatePosition = 0.0
+
+    // Claw
+    var wristPosition = 0.0
+    var isGrabbing = false
 
     private lateinit var extendMotor: DcMotorEx
     private lateinit var pivotMotor: DcMotorEx
     //private lateinit var rotateMotor: DcMotorEx
+
+    private lateinit var rotateServo: Servo
+    private lateinit var grabServo: Servo
 
     override fun onRegister() {
         extendMotor = hardwareMap.get(DcMotorEx::class.java, "extend_motor")
         pivotMotor = hardwareMap.get(DcMotorEx::class.java, "pivot_motor")
         //rotateMotor = hardwareMap.get(DcMotorEx::class.java, "rotate_motor")
 
+        rotateServo = hardwareMap.get(Servo::class.java, "rotate_servo")
+        grabServo = hardwareMap.get(Servo::class.java, "grab_servo")
+
         pivotMotor.direction = DcMotorSimple.Direction.REVERSE
+        rotateServo.direction = Servo.Direction.REVERSE
 
         extendMotor.power = 0.0
         pivotMotor.power = 0.0
@@ -40,18 +51,9 @@ class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode 
         pivotMotor.velocity = 0.0
         //rotateMotor.velocity = 0.0
 
-        when (mode) {
-            Mode.ToPosition -> {
-                extendMotor.stopAndReset()
-                pivotMotor.stopAndReset()
-                //rotateMotor.stopAndReset()
-            }
-            Mode.Manual -> {
-                extendMotor.runEncoder()
-                pivotMotor.runEncoder()
-                //rotateMotor.runEncoder()
-            }
-        }
+        extendMotor.stopAndReset()
+        pivotMotor.stopAndReset()
+        //rotateMotor.stopAndReset()
     }
 
     override fun execute() {
@@ -60,9 +62,15 @@ class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode 
         //rotateMotor.power = 1.0
 
         when (mode) {
-            Mode.ToPosition -> moveToPosition()
+            Mode.WorldSpace -> moveWorldSpace()
             Mode.Manual -> moveManual()
         }
+
+        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
+        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
+        //rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
+
+        claw()
     }
 
     fun doTelemetry(telemetry: Telemetry) {
@@ -72,7 +80,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode 
         telemetry.addLine("pivot motor current: " + pivotMotor.currentPosition)
     }
 
-    private fun moveToPosition() {
+    private fun moveWorldSpace() {
         val turretPos = vec2(position.x, position.z)
         val theta =
             if (turretPos.magnitude > 0.0)
@@ -89,16 +97,17 @@ class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode 
         extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
         //rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
-
-        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
-        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
-        //rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
     }
 
     private fun moveManual() {
-        extendMotor.velocity = toRadiansPerMin(extendVelocity * MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
-        pivotMotor.velocity = toRadiansPerMin(pivotVelocity * MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
-        //rotateMotor.velocity = toRadiansPerMin(rotateVelocity * MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
+        extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
+        pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
+        //rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
+    }
+
+    private fun claw() {
+        rotateServo.position = wristPosition
+        grabServo.position = if (isGrabbing) 0.4 else 0.0
     }
 
     private fun toRadiansPerMin(percent: Double, rpm: Double): Double = percent * 2 * Math.PI * rpm
@@ -109,10 +118,6 @@ class ArmSubsystem(private var hardwareMap: HardwareMap, private var mode: Mode 
         this.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         this.targetPosition = 0
         this.mode = DcMotor.RunMode.RUN_TO_POSITION
-    }
-
-    private fun DcMotorEx.runEncoder() {
-        this.mode = DcMotor.RunMode.RUN_USING_ENCODER
     }
 
     companion object {
