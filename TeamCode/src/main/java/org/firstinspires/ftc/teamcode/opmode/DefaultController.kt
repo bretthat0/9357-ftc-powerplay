@@ -27,6 +27,7 @@ class DefaultController: ControllerBase() {
         arm();
 
         telemetry.addLine("Game harder >:(")
+        telemetry.addLine("delta: $deltaTime")
         armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
@@ -39,14 +40,10 @@ class DefaultController: ControllerBase() {
     private fun arm() {
         //armSubsystem.position = vec3(0.0, 10.0, 10.0)
 
-        armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * DT
-        armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * DT
+        armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * deltaTime
+        armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * deltaTime
 
         armSubsystem.wristPosition = if (gamepad1.x) 0.25 else 0.0
         armSubsystem.isGrabbing = gamepad1.a
-    }
-
-    companion object {
-        const val DT: Double = 0.025
     }
 }

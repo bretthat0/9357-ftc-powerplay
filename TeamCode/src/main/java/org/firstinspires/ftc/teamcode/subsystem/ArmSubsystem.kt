@@ -74,9 +74,9 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     fun doTelemetry(telemetry: Telemetry) {
-        telemetry.addLine("extend motor target: " + extendMotor.targetPosition)
+        telemetry.addLine("extend motor target: $extendPosition")
         telemetry.addLine("extend motor current: " + extendMotor.currentPosition)
-        telemetry.addLine("pivot motor target: " + pivotMotor.targetPosition)
+        telemetry.addLine("pivot motor target: $pivotPosition")
         telemetry.addLine("pivot motor current: " + pivotMotor.currentPosition)
     }
 
