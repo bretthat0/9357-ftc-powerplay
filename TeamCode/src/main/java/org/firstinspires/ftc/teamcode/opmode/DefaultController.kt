@@ -40,8 +40,13 @@ class DefaultController: ControllerBase() {
     private fun arm() {
         //armSubsystem.position = vec3(0.0, 10.0, 10.0)
 
-        armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * deltaTime
-        armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * deltaTime
+        if (gamepad1.y) {
+            armSubsystem.rotatePosition = gamepad1.triggerAxis * 500.0;
+        }
+        else {
+            armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * deltaTime
+            armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * deltaTime
+        }
 
         armSubsystem.wristPosition = if (gamepad1.x) 0.25 else 0.0
         armSubsystem.isGrabbing = gamepad1.a

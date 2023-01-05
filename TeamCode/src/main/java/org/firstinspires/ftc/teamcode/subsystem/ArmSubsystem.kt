@@ -27,7 +27,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
     private lateinit var extendMotor: DcMotorEx
     private lateinit var pivotMotor: DcMotorEx
-    //private lateinit var rotateMotor: DcMotorEx
+    private lateinit var rotateMotor: DcMotorEx
 
     private lateinit var rotateServo: Servo
     private lateinit var grabServo: Servo
@@ -35,7 +35,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     override fun onRegister() {
         extendMotor = hardwareMap.get(DcMotorEx::class.java, "extend_motor")
         pivotMotor = hardwareMap.get(DcMotorEx::class.java, "pivot_motor")
-        //rotateMotor = hardwareMap.get(DcMotorEx::class.java, "rotate_motor")
+        rotateMotor = hardwareMap.get(DcMotorEx::class.java, "rotate_motor")
 
         rotateServo = hardwareMap.get(Servo::class.java, "rotate_servo")
         grabServo = hardwareMap.get(Servo::class.java, "grab_servo")
@@ -45,21 +45,21 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
         extendMotor.power = 0.0
         pivotMotor.power = 0.0
-        //rotateMotor.power = 0.0
+        rotateMotor.power = 0.0
 
         extendMotor.velocity = 0.0
         pivotMotor.velocity = 0.0
-        //rotateMotor.velocity = 0.0
+        rotateMotor.velocity = 0.0
 
         extendMotor.stopAndReset()
         pivotMotor.stopAndReset()
-        //rotateMotor.stopAndReset()
+        rotateMotor.stopAndReset()
     }
 
     override fun execute() {
         extendMotor.power = 1.0
         pivotMotor.power = 1.0
-        //rotateMotor.power = 1.0
+        rotateMotor.power = 1.0
 
         when (mode) {
             Mode.WorldSpace -> moveWorldSpace()
@@ -68,7 +68,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
         extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
         pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
-        //rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
+        rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
 
         claw()
     }
@@ -96,13 +96,13 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
         extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
-        //rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
+        rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
     }
 
     private fun moveManual() {
         extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
-        //rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
+        rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
     }
 
     private fun claw() {
