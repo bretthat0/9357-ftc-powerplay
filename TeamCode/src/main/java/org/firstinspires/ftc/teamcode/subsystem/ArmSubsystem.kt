@@ -19,7 +19,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     // Manual
     var extendPosition = 0.0
     var pivotPosition = 0.0
-    var rotatePosition = 0.0
+    var rotateVelocity = 0.0
 
     // Claw
     var wristPosition = 0.0
@@ -53,7 +53,11 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
         extendMotor.stopAndReset()
         pivotMotor.stopAndReset()
-        rotateMotor.stopAndReset()
+
+        when (mode) {
+            Mode.WorldSpace -> rotateMotor.stopAndReset()
+            Mode.Manual -> rotateMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        }
     }
 
     override fun execute() {
@@ -61,14 +65,13 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         pivotMotor.power = 1.0
         rotateMotor.power = 1.0
 
+        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
+        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
+
         when (mode) {
             Mode.WorldSpace -> moveWorldSpace()
             Mode.Manual -> moveManual()
         }
-
-        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
-        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
-        rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
 
         claw()
     }
@@ -81,6 +84,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     private fun moveWorldSpace() {
+        rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
+
         val turretPos = vec2(position.x, position.z)
         val theta =
             if (turretPos.magnitude > 0.0)
@@ -102,7 +107,9 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     private fun moveManual() {
         extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
-        rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
+        //rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
+
+        rotateMotor.velocity = toRadiansPerMin(rotateVelocity * MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
     }
 
     private fun claw() {

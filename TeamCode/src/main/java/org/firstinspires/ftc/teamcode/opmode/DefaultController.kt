@@ -28,6 +28,7 @@ class DefaultController: ControllerBase() {
 
         telemetry.addLine("Game harder >:(")
         telemetry.addLine("delta: $deltaTime")
+        telemetry.addLine("y: ${gamepad1.y}")
         armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
@@ -38,14 +39,15 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        //armSubsystem.position = vec3(0.0, 10.0, 10.0)
+        armSubsystem.position = vec3(0.0, 10.0, 10.0)
 
         if (gamepad1.y) {
-            armSubsystem.rotatePosition = gamepad1.triggerAxis * 500.0;
+            armSubsystem.rotateVelocity = gamepad1.triggerAxis
         }
         else {
             armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * deltaTime
             armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * deltaTime
+            armSubsystem.rotateVelocity = 0.0
         }
 
         armSubsystem.wristPosition = if (gamepad1.x) 0.25 else 0.0
