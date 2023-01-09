@@ -24,6 +24,7 @@ android {
         }
     }
     namespace = 'org.firstinspires.ftc.teamcode'
+
     androidResources {
         noCompress 'tflite'
     }
