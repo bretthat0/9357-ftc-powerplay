@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode
 import org.firstinspires.ftc.teamcode.opmode.base.ControllerBase
 import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.subsystem.ArmSubsystem
 import org.firstinspires.ftc.teamcode.subsystem.BallDriveSubsystem
 import org.firstinspires.ftc.teamcode.util.vec3
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.teamcode.util.vec3
 class DefaultController: ControllerBase() {
     private lateinit var driveSubsystem: MecanumDriveSubsystem
     private lateinit var armSubsystem: ArmSubsystem
+
+    private var isGrabbing = false
 
     override fun onInit() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
@@ -27,8 +30,6 @@ class DefaultController: ControllerBase() {
         arm();
 
         telemetry.addLine("Game harder >:(")
-        telemetry.addLine("delta: $deltaTime")
-        telemetry.addLine("y: ${gamepad1.y}")
         armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
@@ -39,18 +40,29 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        armSubsystem.position = vec3(0.0, 10.0, 10.0)
+        //armSubsystem.position = vec3(0.0, 10.0, 10.0)
 
-        if (gamepad1.y) {
-            armSubsystem.rotateVelocity = gamepad1.triggerAxis
+        if (gamepad2.y) {
+            armSubsystem.rotatePosition += gamepad2.triggerAxis * INP_SPEED * deltaTime
+            armSubsystem.wristPosition += gamepad2.bumperAxis * 0.01 * deltaTime
         }
         else {
-            armSubsystem.extendPosition += gamepad1.triggerAxis * 0.05 * deltaTime
-            armSubsystem.pivotPosition += gamepad1.bumperAxis * 0.05 * deltaTime
-            armSubsystem.rotateVelocity = 0.0
+            armSubsystem.extendPosition += gamepad2.triggerAxis * INP_SPEED * deltaTime
+            armSubsystem.pivotPosition += gamepad2.bumperAxis * INP_SPEED * deltaTime
         }
 
-        armSubsystem.wristPosition = if (gamepad1.x) 0.25 else 0.0
-        armSubsystem.isGrabbing = gamepad1.a
+        armSubsystem.isGrabbing = isGrabbing
+    }
+
+    override fun onButtonReleased(gamepad: Gamepad, button: GamepadButton) {
+        if (gamepad == gamepad2) {
+            if (button == GamepadButton.A) {
+                isGrabbing = !isGrabbing
+            }
+        }
+    }
+
+    companion object {
+        const val INP_SPEED = 0.12
     }
 }
