@@ -16,6 +16,7 @@ class DefaultController: ControllerBase() {
     private lateinit var armSubsystem: ArmSubsystem
 
     private var speed = (MAX_SPEED + MIN_SPEED) / 2.0
+    private var turret = false
 
     override fun onInit() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
@@ -43,15 +44,23 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        //armSubsystem.position = vec3(0.0, 10.0, 10.0)
+        when (armSubsystem.mode) {
+            ArmSubsystem.Mode.WorldSpace -> {
+                armSubsystem.position.y += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
 
-        if (gamepad2.y) {
-            armSubsystem.rotatePosition += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
-            armSubsystem.wristPosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
-        }
-        else {
-            armSubsystem.extendPosition += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
-            armSubsystem.pivotPosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
+                when (turret) {
+                    true -> armSubsystem.position.x += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
+                    false -> armSubsystem.position.z += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
+                }
+            }
+            ArmSubsystem.Mode.Manual -> {
+                armSubsystem.pivotPosition += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
+
+                when (turret) {
+                    true -> armSubsystem.rotatePosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
+                    false -> armSubsystem.extendPosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
+                }
+            }
         }
     }
 
@@ -66,14 +75,19 @@ class DefaultController: ControllerBase() {
             gamepad2 -> {
                 when (button) {
                     GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
+                    GamepadButton.X -> turret = !turret
                     GamepadButton.RS -> {
                         when (armSubsystem.mode) {
                             ArmSubsystem.Mode.WorldSpace -> ArmSubsystem.Mode.Manual
                             ArmSubsystem.Mode.Manual -> ArmSubsystem.Mode.WorldSpace
                         }
                     }
-                    // TODO: Toggle between arm/turret/claw
-                    // TODO: Dpad Preset Arm Positions
+
+                    // TODO: Preset Arm Positions
+                    GamepadButton.DPAD_UP -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
+                    GamepadButton.DPAD_DOWN -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
+                    GamepadButton.DPAD_LEFT -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
+                    GamepadButton.DPAD_RIGHT -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
                 }
             }
         }
