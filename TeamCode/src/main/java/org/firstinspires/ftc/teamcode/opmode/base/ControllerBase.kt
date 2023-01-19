@@ -53,6 +53,14 @@ abstract class ControllerBase: OpModeBase() {
     val Gamepad.triggerAxis
         get() = (this.right_trigger - this.left_trigger).toDouble()
 
+    fun Gamepad.axis(neg: Boolean, pos: Boolean): Double {
+        var x = 0.0
+        if (neg) x -= 1
+        if (pos) x += 1
+
+        return x
+    }
+
     private var snapshot1 = GamepadSnapshot()
     private var snapshot2 = GamepadSnapshot()
 
@@ -80,8 +88,8 @@ abstract class ControllerBase: OpModeBase() {
         event(GamepadButton.B, b, snapshot.b)
         event(GamepadButton.LB, left_bumper, snapshot.left_bumper)
         event(GamepadButton.RB, right_bumper, snapshot.right_bumper)
-        event(GamepadButton.LS, left_stick_button, snapshot.right_stick_button)
-        event(GamepadButton.RS, right_stick_button, snapshot.left_stick_button)
+        event(GamepadButton.LS, left_stick_button, snapshot.left_stick_button)
+        event(GamepadButton.RS, right_stick_button, snapshot.right_stick_button)
         event(GamepadButton.DPAD_UP, dpad_up, snapshot.dpad_up)
         event(GamepadButton.DPAD_DOWN, dpad_down, snapshot.dpad_down)
         event(GamepadButton.DPAD_LEFT, dpad_left, snapshot.dpad_left)

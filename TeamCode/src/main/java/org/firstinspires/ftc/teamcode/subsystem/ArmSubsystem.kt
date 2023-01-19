@@ -67,9 +67,11 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     fun doTelemetry(telemetry: Telemetry) {
-        telemetry.addLine("extend motor target: $extendPosition")
-        telemetry.addLine("pivot motor target: $pivotPosition")
-        telemetry.addLine("rotate motor target: $rotatePosition")
+        telemetry.addLine("mode: $mode")
+        telemetry.addLine("manual extend target: $extendPosition")
+        telemetry.addLine("manual pivot target: $pivotPosition")
+        telemetry.addLine("manual rotate target: $rotatePosition")
+        telemetry.addLine("IK target: (${position.x}, ${position.y}, ${position.z})")
     }
 
     private fun moveWorldSpace() {

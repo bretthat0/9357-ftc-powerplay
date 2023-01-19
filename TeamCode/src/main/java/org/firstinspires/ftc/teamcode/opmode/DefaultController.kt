@@ -22,8 +22,6 @@ class DefaultController: ControllerBase() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
         armSubsystem = ArmSubsystem(hardwareMap)
 
-        armSubsystem.mode = ArmSubsystem.Mode.Manual
-
         register(driveSubsystem)
         register(armSubsystem)
     }
@@ -34,6 +32,7 @@ class DefaultController: ControllerBase() {
 
         telemetry.addLine("Game harder >:(")
         //driveSubsystem.doTelemetry(telemetry)
+        telemetry.addLine("\nARM:")
         armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
@@ -44,24 +43,37 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
+        var relY = motorDelta(gamepad2.triggerAxis)
+
+        when (turret) {
+            true -> offsetArm(motorDelta(gamepad2.bumperAxis), relY, 0.0)
+            false -> offsetArm(0.0, relY, motorDelta(gamepad2.bumperAxis))
+        }
+
+        armSubsystem.wristPosition += servoDelta(gamepad2.axis(gamepad2.y, gamepad2.b))
+    }
+
+    private fun offsetArm(relX: Double, relY: Double, relZ: Double) {
         when (armSubsystem.mode) {
             ArmSubsystem.Mode.WorldSpace -> {
-                armSubsystem.position.y += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
-
-                when (turret) {
-                    true -> armSubsystem.position.x += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
-                    false -> armSubsystem.position.z += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
-                }
+                armSubsystem.position.x += relX
+                armSubsystem.position.y += relY
+                armSubsystem.position.z += relZ
             }
             ArmSubsystem.Mode.Manual -> {
-                armSubsystem.pivotPosition += gamepad2.triggerAxis * INPUT_DELTA * deltaTime
-
-                when (turret) {
-                    true -> armSubsystem.rotatePosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
-                    false -> armSubsystem.extendPosition += gamepad2.bumperAxis * INPUT_DELTA * deltaTime
-                }
+                armSubsystem.rotatePosition += relX
+                armSubsystem.pivotPosition += relY
+                armSubsystem.extendPosition += relZ
             }
         }
+    }
+
+    private fun motorDelta(x: Double): Double {
+        return x * INPUT_DELTA * deltaTime
+    }
+
+    private fun servoDelta(x: Double): Double {
+        return motorDelta(x) / 4.0
     }
 
     override fun onButtonReleased(gamepad: Gamepad, button: GamepadButton) {
@@ -94,7 +106,7 @@ class DefaultController: ControllerBase() {
     }
 
     companion object {
-        const val INPUT_DELTA = 0.12
+        const val INPUT_DELTA = 0.48
         const val SPEED_STEP = 0.15
 
         const val MAX_SPEED = 1.0
