@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.subsystem.base.SubsystemBase
 import org.firstinspires.ftc.teamcode.util.*
 
@@ -25,6 +26,10 @@ class MecanumDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase
 
         frontLeftMotor.direction = DcMotorSimple.Direction.REVERSE
         backLeftMotor.direction = DcMotorSimple.Direction.REVERSE
+    }
+
+    fun doTelemetry(telemetry: Telemetry) {
+        // TODO
     }
 
     override fun execute() {

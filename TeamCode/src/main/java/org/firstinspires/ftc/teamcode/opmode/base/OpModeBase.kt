@@ -15,7 +15,7 @@ abstract class OpModeBase: OpMode() {
     open fun onLoop() {}
 
     override fun init() {
-        deltaTime = 5e-2;
+        deltaTime = 0.025;
 
         onInit()
     }

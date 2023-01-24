@@ -31,7 +31,7 @@ class DefaultController: ControllerBase() {
         arm()
 
         telemetry.addLine("Game harder >:(")
-        //driveSubsystem.doTelemetry(telemetry)
+        driveSubsystem.doTelemetry(telemetry)
         telemetry.addLine("\nARM:")
         armSubsystem.doTelemetry(telemetry)
         telemetry.update()
@@ -88,12 +88,7 @@ class DefaultController: ControllerBase() {
                 when (button) {
                     GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
                     GamepadButton.X -> turret = !turret
-                    GamepadButton.RS -> {
-                        when (armSubsystem.mode) {
-                            ArmSubsystem.Mode.WorldSpace -> ArmSubsystem.Mode.Manual
-                            ArmSubsystem.Mode.Manual -> ArmSubsystem.Mode.WorldSpace
-                        }
-                    }
+                    GamepadButton.RS -> armSubsystem.toggleMode()
 
                     // TODO: Preset Arm Positions
                     GamepadButton.DPAD_UP -> armSubsystem.position = vec3(0.0, 0.0, 0.0)

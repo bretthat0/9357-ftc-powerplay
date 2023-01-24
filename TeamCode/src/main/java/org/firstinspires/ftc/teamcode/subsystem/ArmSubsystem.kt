@@ -74,6 +74,13 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         telemetry.addLine("IK target: (${position.x}, ${position.y}, ${position.z})")
     }
 
+    fun toggleMode() {
+        mode = when (mode) {
+            Mode.WorldSpace -> Mode.Manual
+            Mode.Manual -> Mode.WorldSpace
+        }
+    }
+
     private fun moveWorldSpace() {
         val turretPos = vec2(position.x, position.z)
         val theta =
@@ -126,18 +133,18 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val MAX_ROTATE_SPEED: Double = 1.0
 
         // MOTOR GEAR RATIO
-        const val EXTEND_MOTOR_GEAR_RATIO: Double = 263.7
-        const val PIVOT_MOTOR_GEAR_RATIO: Double = 263.7
+        const val EXTEND_MOTOR_GEAR_RATIO: Double = 188.0
+        const val PIVOT_MOTOR_GEAR_RATIO: Double = 188.0
         const val ROTATE_MOTOR_GEAR_RATIO: Double = 19.2
 
         // GEAR RATIO
-        const val EXTEND_GEAR_RATIO: Double = 34.0 / 16.0
-        const val PIVOT_GEAR_RATIO: Double = 34.0 / 16.0
+        const val EXTEND_GEAR_RATIO: Double = 16.0 / 34.0
+        const val PIVOT_GEAR_RATIO: Double = 16.0 / 34.0
         const val ROTATE_GEAR_RATIO: Double = 2.0 / 1.0
 
         // MOTOR TICKS PER REVOLUTION
-        const val EXTEND_MOTOR_TPR: Double = 7.0 * EXTEND_MOTOR_GEAR_RATIO
-        const val PIVOT_MOTOR_TPR: Double = 7.0 * PIVOT_MOTOR_GEAR_RATIO
+        const val EXTEND_MOTOR_TPR: Double = 5281.1
+        const val PIVOT_MOTOR_TPR: Double = 5281.1
         const val ROTATE_MOTOR_TPR: Double = 537.7
 
         // TICKS PER REVOLUTION
