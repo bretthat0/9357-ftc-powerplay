@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.util.*
 
 
 class MecanumDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
+    var speed = 0.55
     var leftInput = Vector2.zero
     var rightInput = Vector2.zero
 
@@ -37,9 +38,9 @@ class MecanumDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase
         val x = leftInput.x
         val rx = rightInput.x
 
-        frontLeftMotor.power = y + x + rx
-        frontRightMotor.power = y - x - rx
-        backLeftMotor.power = y - x + rx
-        backRightMotor.power = y + x - rx
+        frontLeftMotor.power = (y + x + rx) * speed
+        frontRightMotor.power = (y - x - rx) * speed
+        backLeftMotor.power = (y - x + rx) * speed
+        backRightMotor.power = (y + x - rx) * speed
     }
 }

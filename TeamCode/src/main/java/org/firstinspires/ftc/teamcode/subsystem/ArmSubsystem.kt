@@ -14,7 +14,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     var mode = Mode.WorldSpace
 
     // WorldSpace
-    var position = Vector3.zero
+    var position = Vector3.forward
 
     // Manual
     var extendPosition = 0.0
@@ -40,8 +40,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         rotateServo = hardwareMap.get(Servo::class.java, "rotate_servo")
         grabServo = hardwareMap.get(Servo::class.java, "grab_servo")
 
-        extendMotor.direction = DcMotorSimple.Direction.REVERSE
-        pivotMotor.direction = DcMotorSimple.Direction.REVERSE
+        //extendMotor.direction = DcMotorSimple.Direction.REVERSE
+        //pivotMotor.direction = DcMotorSimple.Direction.REVERSE
         rotateServo.direction = Servo.Direction.REVERSE
 
         extendMotor.velocity = 0.0

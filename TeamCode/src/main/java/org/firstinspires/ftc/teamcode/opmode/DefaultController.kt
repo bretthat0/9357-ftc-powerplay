@@ -15,12 +15,11 @@ class DefaultController: ControllerBase() {
     private lateinit var driveSubsystem: MecanumDriveSubsystem
     private lateinit var armSubsystem: ArmSubsystem
 
-    private var speed = (MAX_SPEED + MIN_SPEED) / 2.0
-    private var turret = false
-
     override fun onInit() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
         armSubsystem = ArmSubsystem(hardwareMap)
+
+        armSubsystem.mode = ArmSubsystem.Mode.Manual
 
         register(driveSubsystem)
         register(armSubsystem)
@@ -38,22 +37,15 @@ class DefaultController: ControllerBase() {
     }
 
     private fun drive() {
-        driveSubsystem.leftInput = gamepad1.leftStick * speed
-        driveSubsystem.rightInput = gamepad1.rightStick * speed
+        driveSubsystem.leftInput = gamepad1.leftStick
+        driveSubsystem.rightInput = gamepad1.rightStick
     }
 
     private fun arm() {
+        var relX = motorDelta(gamepad2.leftStick.x)
         var relY = motorDelta(gamepad2.triggerAxis)
+        var relZ = motorDelta(gamepad2.bumperAxis)
 
-        when (turret) {
-            true -> offsetArm(motorDelta(gamepad2.bumperAxis), relY, 0.0)
-            false -> offsetArm(0.0, relY, motorDelta(gamepad2.bumperAxis))
-        }
-
-        armSubsystem.wristPosition += servoDelta(gamepad2.axis(gamepad2.y, gamepad2.b))
-    }
-
-    private fun offsetArm(relX: Double, relY: Double, relZ: Double) {
         when (armSubsystem.mode) {
             ArmSubsystem.Mode.WorldSpace -> {
                 armSubsystem.position.x += relX
@@ -66,6 +58,8 @@ class DefaultController: ControllerBase() {
                 armSubsystem.extendPosition += relZ
             }
         }
+
+        armSubsystem.wristPosition += servoDelta(gamepad1.axis(gamepad1.y, gamepad1.b))
     }
 
     private fun motorDelta(x: Double): Double {
@@ -80,14 +74,13 @@ class DefaultController: ControllerBase() {
         when (gamepad) {
             gamepad1 -> {
                 when (button) {
-                    GamepadButton.DPAD_UP -> min(speed + SPEED_STEP, MAX_SPEED)
-                    GamepadButton.DPAD_DOWN -> max(speed - SPEED_STEP, MIN_SPEED)
+                    GamepadButton.DPAD_UP -> driveSubsystem.speed = min(driveSubsystem.speed + SPEED_STEP, MAX_SPEED)
+                    GamepadButton.DPAD_DOWN -> driveSubsystem.speed = max(driveSubsystem.speed - SPEED_STEP, MIN_SPEED)
                 }
             }
             gamepad2 -> {
                 when (button) {
                     GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
-                    GamepadButton.X -> turret = !turret
                     GamepadButton.RS -> armSubsystem.toggleMode()
 
                     // TODO: Preset Arm Positions
@@ -101,7 +94,7 @@ class DefaultController: ControllerBase() {
     }
 
     companion object {
-        const val INPUT_DELTA = 0.48
+        const val INPUT_DELTA = 0.24
         const val SPEED_STEP = 0.15
 
         const val MAX_SPEED = 1.0
