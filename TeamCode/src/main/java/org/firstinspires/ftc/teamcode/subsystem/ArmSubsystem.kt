@@ -71,7 +71,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         telemetry.addLine("manual extend target: $extendPosition")
         telemetry.addLine("manual pivot target: $pivotPosition")
         telemetry.addLine("manual rotate target: $rotatePosition")
-        telemetry.addLine("IK target: (${position.x}, ${position.y}, ${position.z})")
+        //telemetry.addLine("IK target: (${position.x}, ${position.y}, ${position.z})")
     }
 
     fun toggleMode() {

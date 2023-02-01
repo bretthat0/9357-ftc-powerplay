@@ -42,24 +42,11 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        var relX = motorDelta(gamepad2.leftStick.x)
-        var relY = motorDelta(gamepad2.triggerAxis)
-        var relZ = motorDelta(gamepad2.bumperAxis)
+        armSubsystem.rotatePosition += motorDelta(gamepad2.triggerAxis)
+        armSubsystem.pivotPosition += motorDelta(gamepad2.rightStick.y)
+        armSubsystem.extendPosition += motorDelta(gamepad2.leftStick.y)
 
-        when (armSubsystem.mode) {
-            ArmSubsystem.Mode.WorldSpace -> {
-                armSubsystem.position.x += relX
-                armSubsystem.position.y += relY
-                armSubsystem.position.z += relZ
-            }
-            ArmSubsystem.Mode.Manual -> {
-                armSubsystem.rotatePosition += relX
-                armSubsystem.pivotPosition += relY
-                armSubsystem.extendPosition += relZ
-            }
-        }
-
-        armSubsystem.wristPosition += servoDelta(gamepad1.axis(gamepad1.y, gamepad1.b))
+        armSubsystem.wristPosition += servoDelta(gamepad1.triggerAxis)
     }
 
     private fun motorDelta(x: Double): Double {
@@ -74,20 +61,10 @@ class DefaultController: ControllerBase() {
         when (gamepad) {
             gamepad1 -> {
                 when (button) {
+                    GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
+
                     GamepadButton.DPAD_UP -> driveSubsystem.speed = min(driveSubsystem.speed + SPEED_STEP, MAX_SPEED)
                     GamepadButton.DPAD_DOWN -> driveSubsystem.speed = max(driveSubsystem.speed - SPEED_STEP, MIN_SPEED)
-                }
-            }
-            gamepad2 -> {
-                when (button) {
-                    GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
-                    GamepadButton.RS -> armSubsystem.toggleMode()
-
-                    // TODO: Preset Arm Positions
-                    GamepadButton.DPAD_UP -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
-                    GamepadButton.DPAD_DOWN -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
-                    GamepadButton.DPAD_LEFT -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
-                    GamepadButton.DPAD_RIGHT -> armSubsystem.position = vec3(0.0, 0.0, 0.0)
                 }
             }
         }
