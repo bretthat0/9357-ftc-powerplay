@@ -54,8 +54,8 @@ class VisionSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     companion object {
         // Lens intrinsics of Logitech C615
         // Focal point
-        const val FX = 578.272 // pixels ??
-        const val FY = 578.272 // pixels ??
+        const val FX = 394.8387 // pixels
+        const val FY = 394.8387 // pixels
         // Optical center
         const val CX = 960.000 // pixels
         const val CY = 540.000 // pixels
@@ -64,6 +64,6 @@ class VisionSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val CAM_WIDTH = 1920 // pixels
         const val CAM_HEIGHT = 1080 // pixels
 
-        const val TAG_SIZE = 0.166 // meters
+        const val TAG_SIZE = 1.425 * (1.0 / 39.3701) // in * (m/in) = meters
     }
 }
