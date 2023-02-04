@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.subsystem.base.SubsystemBase
 import org.firstinspires.ftc.teamcode.util.*
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.math.acos
+import kotlin.math.max
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     enum class Mode {
@@ -40,8 +41,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         rotateServo = hardwareMap.get(Servo::class.java, "rotate_servo")
         grabServo = hardwareMap.get(Servo::class.java, "grab_servo")
 
-        //extendMotor.direction = DcMotorSimple.Direction.REVERSE
-        //pivotMotor.direction = DcMotorSimple.Direction.REVERSE
+        extendMotor.direction = DcMotorSimple.Direction.REVERSE
+        pivotMotor.direction = DcMotorSimple.Direction.REVERSE
         rotateServo.direction = Servo.Direction.REVERSE
 
         extendMotor.velocity = 0.0

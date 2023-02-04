@@ -34,8 +34,10 @@ class MecanumDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase
     }
 
     override fun execute() {
+        // y-reversed since camera is placed on back
+        // x-reverse since...?? IDK why
         val y = -leftInput.y
-        val x = leftInput.x
+        val x = -leftInput.x
         val rx = rightInput.x
 
         frontLeftMotor.power = (y + x + rx) * speed

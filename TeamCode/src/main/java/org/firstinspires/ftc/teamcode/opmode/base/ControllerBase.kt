@@ -44,9 +44,9 @@ abstract class ControllerBase: OpModeBase() {
         )
 
     val Gamepad.leftStick
-        get() = vec2(this.left_stick_x, this.left_stick_y)
+        get() = vec2(this.left_stick_x, -this.left_stick_y)
     val Gamepad.rightStick
-        get() = vec2(this.right_stick_x, this.right_stick_y)
+        get() = vec2(this.right_stick_x, -this.right_stick_y)
 
     val Gamepad.bumperAxis
         get() = if (this.right_bumper) 1.0 else 0.0 - if (this.left_bumper) 1.0 else 0.0

@@ -42,19 +42,19 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        armSubsystem.rotatePosition += motorDelta(gamepad2.triggerAxis)
-        armSubsystem.pivotPosition += motorDelta(gamepad2.rightStick.y)
-        armSubsystem.extendPosition += motorDelta(gamepad2.leftStick.y)
+        armSubsystem.rotatePosition += inputDelta(gamepad2.triggerAxis)
+        armSubsystem.pivotPosition += inputDelta(gamepad2.rightStick.y)
+        armSubsystem.extendPosition += inputDelta(gamepad2.leftStick.y)
 
-        armSubsystem.wristPosition += servoDelta(gamepad1.triggerAxis)
+        armSubsystem.wristPosition += inputDelta(gamepad1.triggerAxis)
+
+        // Constraints
+        armSubsystem.pivotPosition = max(armSubsystem.pivotPosition, 0.0)
+        armSubsystem.wristPosition = max(min(armSubsystem.wristPosition, 1.0), -1.0)
     }
 
-    private fun motorDelta(x: Double): Double {
+    private fun inputDelta(x: Double): Double {
         return x * INPUT_DELTA * deltaTime
-    }
-
-    private fun servoDelta(x: Double): Double {
-        return motorDelta(x) / 4.0
     }
 
     override fun onButtonReleased(gamepad: Gamepad, button: GamepadButton) {
@@ -62,6 +62,7 @@ class DefaultController: ControllerBase() {
             gamepad1 -> {
                 when (button) {
                     GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
+                    GamepadButton.Y -> armSubsystem.wristPosition = 0.0
 
                     GamepadButton.DPAD_UP -> driveSubsystem.speed = min(driveSubsystem.speed + SPEED_STEP, MAX_SPEED)
                     GamepadButton.DPAD_DOWN -> driveSubsystem.speed = max(driveSubsystem.speed - SPEED_STEP, MIN_SPEED)
@@ -71,7 +72,7 @@ class DefaultController: ControllerBase() {
     }
 
     companion object {
-        const val INPUT_DELTA = 0.24
+        const val INPUT_DELTA = 0.4
         const val SPEED_STEP = 0.15
 
         const val MAX_SPEED = 1.0

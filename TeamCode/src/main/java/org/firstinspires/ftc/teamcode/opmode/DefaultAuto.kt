@@ -8,12 +8,13 @@ import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
 import org.firstinspires.ftc.teamcode.subsystem.VisionSubsystem
 
 @Autonomous(name="Default Auto")
-class DefaultAuto: AutoBase() {
+open class DefaultAuto: AutoBase() {
     private lateinit var driveSubsystem: MecanumDriveSubsystem
     private lateinit var armSubsystem: ArmSubsystem
     private lateinit var visionSubsystem: VisionSubsystem
 
-    private val tagVisible: Boolean
+    protected var tagId = 1
+    protected val tagVisible: Boolean
         get() = visionSubsystem.visibleTags.isNotEmpty()
 
     enum class Direction {
@@ -33,57 +34,51 @@ class DefaultAuto: AutoBase() {
 
     override suspend fun onStart() {
         while (isRunning) {
-            // Capture ID of visible tag
-            val tagId = if (tagVisible) visionSubsystem.visibleTags[0].id else 0
-
             wait(1.0)
 
-            // INSTRUCTIONS
-            claw(true)
-            drive(Direction.FORWARD, 0.5)
-            positionArm(90, 0)
-            claw(false)
-            positionArm(0, 0)
-            drive(Direction.BACK, 0.5)
-
-            // Do different instructions depending on what tag was read at start
-            // e.g. park in different spots
-            when (tagId) {
-                0 -> {
-                    // ...
-                }
-                1 -> {
-                    // ...
-                }
-                2 -> {
-                    // ...
-                }
+            // Capture ID of visible tag
+            if (tagVisible) {
+                tagId = visionSubsystem.visibleTags[0].id
             }
+
+            executeInstructions()
+
+            requestOpModeStop()
         }
     }
 
-    private suspend fun drive(direction: Direction, seconds: Double) {
+    protected open suspend fun executeInstructions() {
+        when (tagId) {
+            0 -> drive(Direction.LEFT, 1.0)
+            2 -> drive(Direction.RIGHT, 1.0)
+        }
+
+        drive(Direction.FORWARD, 0.5)
+    }
+
+    protected suspend fun drive(direction: Direction, seconds: Double) {
         driveSubsystem.leftInput = vec2(direction)
+        driveSubsystem.execute()
         wait(seconds)
     }
 
-    private suspend fun claw(grabbing: Boolean) {
+    protected suspend fun claw(grabbing: Boolean) {
         armSubsystem.isGrabbing = grabbing
         wait(0.5)
     }
 
-    private suspend fun positionArm(pivotDegrees: Int, extendDegrees: Int) {
+    protected suspend fun positionArm(pivotDegrees: Int, extendDegrees: Int) {
         armSubsystem.pivotPosition = pivotDegrees / 360.0
         armSubsystem.extendPosition = extendDegrees / 360.0
         wait(2.0)
     }
 
-    private suspend fun positionTurret(rotateDegrees: Int) {
+    protected suspend fun positionTurret(rotateDegrees: Int) {
         armSubsystem.rotatePosition = rotateDegrees / 360.0
         wait(2.0)
     }
 
-    private fun vec2(dir: Direction): Vector2 {
+    protected fun vec2(dir: Direction): Vector2 {
         return when (dir) {
             Direction.FORWARD -> vec2(0.0, 1.0)
             Direction.BACK -> vec2(0.0, -1.0)

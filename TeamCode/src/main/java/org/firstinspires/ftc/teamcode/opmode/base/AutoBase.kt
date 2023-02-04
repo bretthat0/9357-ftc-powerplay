@@ -28,7 +28,7 @@ abstract class AutoBase: OpModeBase() {
 
     suspend fun wait(seconds: Double) {
         if (isRunning) {
-            delay((seconds / 1000).toLong())
+            delay((seconds * 1000).toLong())
         }
     }
 
