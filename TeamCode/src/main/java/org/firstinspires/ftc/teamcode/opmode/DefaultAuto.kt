@@ -43,6 +43,8 @@ open class DefaultAuto: AutoBase() {
 
             executeInstructions()
 
+            wait(1.0)
+
             requestOpModeStop()
         }
     }
@@ -60,8 +62,10 @@ open class DefaultAuto: AutoBase() {
         driveSubsystem.leftInput = vec2(direction)
         driveSubsystem.execute()
         wait(seconds)
+        driveSubsystem.leftInput = Vector2.zero
+        driveSubsystem.execute()
     }
-
+    /*
     protected suspend fun claw(grabbing: Boolean) {
         armSubsystem.isGrabbing = grabbing
         wait(0.5)
@@ -76,7 +80,7 @@ open class DefaultAuto: AutoBase() {
     protected suspend fun positionTurret(rotateDegrees: Int) {
         armSubsystem.rotatePosition = rotateDegrees / 360.0
         wait(2.0)
-    }
+    }*/
 
     protected fun vec2(dir: Direction): Vector2 {
         return when (dir) {

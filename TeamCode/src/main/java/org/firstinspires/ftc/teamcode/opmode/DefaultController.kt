@@ -15,6 +15,10 @@ class DefaultController: ControllerBase() {
     private lateinit var driveSubsystem: MecanumDriveSubsystem
     private lateinit var armSubsystem: ArmSubsystem
 
+    private var slowMode = false
+    private val slowFactor: Double
+        get() = if (slowMode) 0.3 else 1.0
+
     override fun onInit() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
         armSubsystem = ArmSubsystem(hardwareMap)
@@ -30,9 +34,9 @@ class DefaultController: ControllerBase() {
         arm()
 
         telemetry.addLine("Game harder >:(")
-        driveSubsystem.doTelemetry(telemetry)
-        telemetry.addLine("\nARM:")
-        armSubsystem.doTelemetry(telemetry)
+        telemetry.addLine("Turret slow mode: $slowMode")
+        /*driveSubsystem.doTelemetry(telemetry)
+        armSubsystem.doTelemetry(telemetry)*/
         telemetry.update()
     }
 
@@ -42,9 +46,9 @@ class DefaultController: ControllerBase() {
     }
 
     private fun arm() {
-        armSubsystem.rotatePosition += inputDelta(gamepad2.triggerAxis)
-        armSubsystem.pivotPosition += inputDelta(gamepad2.rightStick.y)
-        armSubsystem.extendPosition += inputDelta(gamepad2.leftStick.y)
+        armSubsystem.rotatePosition += inputDelta(gamepad2.triggerAxis * slowFactor * 0.5)
+        armSubsystem.pivotPosition += inputDelta(gamepad2.rightStick.y * slowFactor)
+        armSubsystem.extendPosition += inputDelta(gamepad2.leftStick.y * slowFactor)
 
         armSubsystem.wristPosition += inputDelta(gamepad1.triggerAxis)
 
@@ -68,11 +72,16 @@ class DefaultController: ControllerBase() {
                     GamepadButton.DPAD_DOWN -> driveSubsystem.speed = max(driveSubsystem.speed - SPEED_STEP, MIN_SPEED)
                 }
             }
+            gamepad2 -> {
+                when (button) {
+                    GamepadButton.RB -> slowMode = !slowMode
+                }
+            }
         }
     }
 
     companion object {
-        const val INPUT_DELTA = 0.4
+        const val INPUT_DELTA = 0.65
         const val SPEED_STEP = 0.15
 
         const val MAX_SPEED = 1.0
