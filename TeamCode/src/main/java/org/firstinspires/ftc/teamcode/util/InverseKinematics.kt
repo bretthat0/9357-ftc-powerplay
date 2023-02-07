@@ -9,20 +9,14 @@ fun DoubleJointIK(position: Vector2, extent: Double) = DoubleJointIK(position, e
 fun DoubleJointIK(x: Double, y: Double, extent: Double) = DoubleJointIK(vec2(x, y), extent)
 
 data class DoubleJointIK(var position: Vector2, var armLength1: Double, var armLength2: Double) {
-    val x: Double
-        get() = position.x
-    val y: Double
-        get() = position.y
-    val a1: Double
-        get() = armLength1
-    val a2: Double
-        get() = armLength2
+    val x = position.x
+    val y = position.y
+    val a1 = armLength1
+    val a2 = armLength2
 
     val extent: Double
         get() = a1 + a2
 
-    val q1: Double
-        get() = atan(y / x) - atan((a2 * sin(q2)) / (a1 + a2 * cos(q2)))
-    val q2: Double
-        get() = -acos((x*x + y*y - a1*a1 - a2*a2) / (2 * a1 * a2))
+    val q2 = -acos((x*x + y*y - a1*a1 - a2*a2) / (2 * a1 * a2))
+    val q1 = atan(y / x) - atan((a2 * sin(q2)) / (a1 + a2 * cos(q2)))
 }

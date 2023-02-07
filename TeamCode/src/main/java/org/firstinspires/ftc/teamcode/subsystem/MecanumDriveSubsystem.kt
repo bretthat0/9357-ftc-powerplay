@@ -30,7 +30,7 @@ class MecanumDriveSubsystem(private var hardwareMap: HardwareMap): SubsystemBase
     }
 
     fun doTelemetry(telemetry: Telemetry) {
-        // TODO
+        telemetry.addLine("(DRIVE) Speed: $speed")
     }
 
     override fun execute() {

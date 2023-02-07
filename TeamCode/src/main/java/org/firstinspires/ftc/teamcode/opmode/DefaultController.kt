@@ -5,10 +5,7 @@ import org.firstinspires.ftc.teamcode.subsystem.MecanumDriveSubsystem
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.subsystem.ArmSubsystem
-import org.firstinspires.ftc.teamcode.subsystem.BallDriveSubsystem
-import org.firstinspires.ftc.teamcode.util.vec3
-import kotlin.math.max
-import kotlin.math.min
+import org.firstinspires.ftc.teamcode.util.*
 
 @TeleOp(name = "Default Controller")
 class DefaultController: ControllerBase() {
@@ -23,7 +20,8 @@ class DefaultController: ControllerBase() {
         driveSubsystem = MecanumDriveSubsystem(hardwareMap)
         armSubsystem = ArmSubsystem(hardwareMap)
 
-        armSubsystem.mode = ArmSubsystem.Mode.Manual
+        // For testing
+        armSubsystem.planePosition = vec2(17.0, 17.0)
 
         register(driveSubsystem)
         register(armSubsystem)
@@ -34,27 +32,40 @@ class DefaultController: ControllerBase() {
         arm()
 
         telemetry.addLine("Game harder >:(")
-        telemetry.addLine("Turret slow mode: $slowMode")
-        /*driveSubsystem.doTelemetry(telemetry)
-        armSubsystem.doTelemetry(telemetry)*/
+        telemetry.addLine("Slow mode: $slowMode")
+        driveSubsystem.doTelemetry(telemetry)
+        armSubsystem.doTelemetry(telemetry)
         telemetry.update()
     }
 
     private fun drive() {
         driveSubsystem.leftInput = gamepad1.leftStick
         driveSubsystem.rightInput = gamepad1.rightStick
+
+        driveSubsystem.speed = clamp(driveSubsystem.speed, MIN_SPEED, MAX_SPEED)
     }
 
     private fun arm() {
-        armSubsystem.rotatePosition += inputDelta(gamepad2.triggerAxis * slowFactor * 0.5)
-        armSubsystem.pivotPosition += inputDelta(gamepad2.rightStick.y * slowFactor)
-        armSubsystem.extendPosition += inputDelta(gamepad2.leftStick.y * slowFactor)
+        val delX = inputDelta(gamepad2.leftStick.x * slowFactor)
+        val delY = inputDelta(gamepad2.leftStick.y * slowFactor)
 
+        when (armSubsystem.mode) {
+            ArmSubsystem.Mode.Plane -> {
+                armSubsystem.planePosition.x += delX * 12
+                armSubsystem.planePosition.y += delY * 12
+            }
+            ArmSubsystem.Mode.Manual -> {
+                armSubsystem.manualPosition.x += delX
+                armSubsystem.manualPosition.y += delY
+            }
+        }
+
+        armSubsystem.rotatePosition += inputDelta(gamepad2.triggerAxis * slowFactor * 0.5)
         armSubsystem.wristPosition += inputDelta(gamepad1.triggerAxis)
 
-        // Constraints
-        armSubsystem.pivotPosition = max(armSubsystem.pivotPosition, 0.0)
-        armSubsystem.wristPosition = max(min(armSubsystem.wristPosition, 1.0), -1.0)
+        armSubsystem.planePosition.clampMagnitude(ArmSubsystem.ARM_LENGTH)
+        armSubsystem.planePosition = clamp(armSubsystem.planePosition, vec2(1.0, -100.0), Vector2.inf)
+        armSubsystem.wristPosition = clamp(armSubsystem.wristPosition, -1.0, 1.0)
     }
 
     private fun inputDelta(x: Double): Double {
@@ -67,14 +78,16 @@ class DefaultController: ControllerBase() {
                 when (button) {
                     GamepadButton.A -> armSubsystem.isGrabbing = !armSubsystem.isGrabbing
                     GamepadButton.Y -> armSubsystem.wristPosition = 0.0
-
-                    GamepadButton.DPAD_UP -> driveSubsystem.speed = min(driveSubsystem.speed + SPEED_STEP, MAX_SPEED)
-                    GamepadButton.DPAD_DOWN -> driveSubsystem.speed = max(driveSubsystem.speed - SPEED_STEP, MIN_SPEED)
+                    GamepadButton.DPAD_UP -> driveSubsystem.speed += SPEED_STEP
+                    GamepadButton.DPAD_DOWN -> driveSubsystem.speed -= SPEED_STEP
+                    else -> {}
                 }
             }
             gamepad2 -> {
                 when (button) {
                     GamepadButton.RB -> slowMode = !slowMode
+                    GamepadButton.RS -> armSubsystem.toggleMode()
+                    else -> {}
                 }
             }
         }

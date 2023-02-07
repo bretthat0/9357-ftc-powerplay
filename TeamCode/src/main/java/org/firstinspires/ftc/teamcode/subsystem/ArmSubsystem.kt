@@ -9,22 +9,20 @@ import kotlin.math.max
 
 class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     enum class Mode {
-        WorldSpace, Manual
+        Plane, Manual
     }
 
-    var mode = Mode.WorldSpace
+    var mode = Mode.Plane
 
-    // WorldSpace
-    var position = Vector3.forward
-
-    // Manual
-    var extendPosition = 0.0
-    var pivotPosition = 0.0
+    var planePosition = Vector2.one
+    var manualPosition = Vector2.zero
     var rotatePosition = 0.0
 
-    // Claw
     var wristPosition = 0.0
     var isGrabbing = false
+
+    private var debugQ1 = 0.0
+    private var debugQ2 = 0.0
 
     private lateinit var extendMotor: DcMotorEx
     private lateinit var pivotMotor: DcMotorEx
@@ -55,56 +53,55 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     }
 
     override fun execute() {
-        extendMotor.velocity = toRadiansPerMin(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
-        pivotMotor.velocity = toRadiansPerMin(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
-        rotateMotor.velocity = toRadiansPerMin(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
+        extendMotor.velocity = toRadiansPerSec(MAX_EXTEND_SPEED, EXTEND_MOTOR_RPM)
+        pivotMotor.velocity = toRadiansPerSec(MAX_PIVOT_SPEED, PIVOT_MOTOR_RPM)
+        rotateMotor.velocity = toRadiansPerSec(MAX_ROTATE_SPEED, ROTATE_MOTOR_RPM)
 
         when (mode) {
-            Mode.WorldSpace -> moveWorldSpace()
+            Mode.Plane -> movePlane()
             Mode.Manual -> moveManual()
         }
+
+        rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
 
         claw()
     }
 
     fun doTelemetry(telemetry: Telemetry) {
-        telemetry.addLine("mode: $mode")
-        telemetry.addLine("manual extend target: $extendPosition")
-        telemetry.addLine("manual pivot target: $pivotPosition")
-        telemetry.addLine("manual rotate target: $rotatePosition")
-        //telemetry.addLine("IK target: (${position.x}, ${position.y}, ${position.z})")
+        telemetry.addLine("(ARM) Mode: $mode")
+        telemetry.addLine("(ARM) IK target: (${planePosition.x}, ${planePosition.y})")
+        telemetry.addLine("(ARM) IK angles: (q1: $debugQ1, q2: $debugQ2)")
+        telemetry.addLine("(ARM) Arm ticks: (pivot: ${pivotMotor.targetPosition}, extend: ${extendMotor.targetPosition})")
     }
 
     fun toggleMode() {
         mode = when (mode) {
-            Mode.WorldSpace -> Mode.Manual
-            Mode.Manual -> Mode.WorldSpace
+            Mode.Plane -> Mode.Manual
+            Mode.Manual -> Mode.Plane
         }
     }
 
-    private fun moveWorldSpace() {
-        val turretPos = vec2(position.x, position.z)
-        val theta =
-            if (turretPos.magnitude > 0.0)
-                acos((turretPos dot Vector2.up) / turretPos.magnitude)
-            else 0.0
+    private fun movePlane() {
+        val ik = DoubleJointIK(planePosition, ARM_LENGTH)
 
-        val planarPos = vec2(vec2(position.x, position.z).magnitude, position.y)
-        val ik = DoubleJointIK(planarPos, ARM_LENGTH)
+        // TODO: OFFSET ZERO
 
-        val extendPos = toRevolutions(ik.q1 + ik.q2)
-        val pivotPos = toRevolutions(Math.PI - ik.q1)
-        val rotatePos = toRevolutions(theta)
+        val extendPosition = toRevolutions(ik.q1 + ik.q2)
+        val pivotPosition = toRevolutions(Math.PI - ik.q1)
 
-        extendMotor.targetPosition = toTicks(extendPos, EXTEND_TPR)
-        pivotMotor.targetPosition = toTicks(pivotPos, PIVOT_TPR)
-        rotateMotor.targetPosition = toTicks(rotatePos, ROTATE_TPR)
+        extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
+        pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
+
+        debugQ1 = ik.q1
+        debugQ2 = ik.q2
     }
 
     private fun moveManual() {
+        val extendPosition = manualPosition.x
+        val pivotPosition = manualPosition.y
+
         extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
-        rotateMotor.targetPosition = toTicks(rotatePosition, ROTATE_TPR)
     }
 
     private fun claw() {
@@ -112,7 +109,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         grabServo.position = if (isGrabbing) 0.4 else 0.0
     }
 
-    private fun toRadiansPerMin(percent: Double, rpm: Double): Double = percent * 2 * Math.PI * rpm
+    private fun toRadiansPerSec(factor: Double, rpm: Double): Double = factor * 2 * Math.PI * rpm * 60
     private fun toRevolutions(radians: Double): Double = radians / (2 * Math.PI)
     private fun toTicks(revolutions: Double, tpr: Double): Int = (revolutions * tpr).toInt()
 
@@ -124,23 +121,18 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
     companion object {
         // RPM
-        const val EXTEND_MOTOR_RPM: Double = 312.0
-        const val PIVOT_MOTOR_RPM: Double = 312.0
-        const val ROTATE_MOTOR_RPM: Double = 125.0
+        const val EXTEND_MOTOR_RPM: Double = 30.0
+        const val PIVOT_MOTOR_RPM: Double = 30.0
+        const val ROTATE_MOTOR_RPM: Double = 312.0
 
         // SPEED
         const val MAX_EXTEND_SPEED: Double = 1.0
         const val MAX_PIVOT_SPEED: Double = 1.0
         const val MAX_ROTATE_SPEED: Double = 1.0
 
-        // MOTOR GEAR RATIO
-        const val EXTEND_MOTOR_GEAR_RATIO: Double = 188.0
-        const val PIVOT_MOTOR_GEAR_RATIO: Double = 188.0
-        const val ROTATE_MOTOR_GEAR_RATIO: Double = 19.2
-
         // GEAR RATIO
-        const val EXTEND_GEAR_RATIO: Double = 16.0 / 34.0
-        const val PIVOT_GEAR_RATIO: Double = 16.0 / 34.0
+        const val EXTEND_GEAR_RATIO: Double = 34.0 / 16.0
+        const val PIVOT_GEAR_RATIO: Double = 34.0 / 16.0
         const val ROTATE_GEAR_RATIO: Double = 2.0 / 1.0
 
         // MOTOR TICKS PER REVOLUTION

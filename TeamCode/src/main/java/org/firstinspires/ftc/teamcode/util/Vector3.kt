@@ -11,6 +11,8 @@ fun abs(vector: Vector3) = vec3(abs(vector.x), abs(vector.y), abs(vector.z))
 data class Vector3(var x: Double, var y: Double, var z: Double) {
     companion object {
         val zero = Vector3(0.0, 0.0, 0.0)
+        val one = Vector3(1.0, 1.0, 1.0)
+        val inf = Vector3(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
         val right = Vector3(1.0, 0.0, 0.0)
         val up = Vector3(0.0, 1.0, 0.0)
         val forward = Vector3(0.0, 0.0, 1.0)
