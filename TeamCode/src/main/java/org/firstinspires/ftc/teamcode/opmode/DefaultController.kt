@@ -51,8 +51,8 @@ class DefaultController: ControllerBase() {
 
         when (armSubsystem.mode) {
             ArmSubsystem.Mode.Plane -> {
-                armSubsystem.planePosition.x += delX * 12
-                armSubsystem.planePosition.y += delY * 12
+                armSubsystem.planePosition.x += delX * ArmSubsystem.ARM_LENGTH
+                armSubsystem.planePosition.y += delY * ArmSubsystem.ARM_LENGTH
             }
             ArmSubsystem.Mode.Manual -> {
                 armSubsystem.manualPosition.x += delX
@@ -64,7 +64,7 @@ class DefaultController: ControllerBase() {
         armSubsystem.wristPosition += inputDelta(gamepad1.triggerAxis)
 
         armSubsystem.planePosition.clampMagnitude(ArmSubsystem.ARM_LENGTH)
-        armSubsystem.planePosition = clamp(armSubsystem.planePosition, vec2(1.0, -100.0), Vector2.inf)
+        armSubsystem.planePosition = clamp(armSubsystem.planePosition, vec2(1.0, -2.0), Vector2.inf)
         armSubsystem.wristPosition = clamp(armSubsystem.wristPosition, -1.0, 1.0)
     }
 

@@ -84,10 +84,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     private fun movePlane() {
         val ik = DoubleJointIK(planePosition, ARM_LENGTH)
 
-        // TODO: OFFSET ZERO
-
-        val extendPosition = toRevolutions(ik.q1 + ik.q2)
-        val pivotPosition = toRevolutions(Math.PI - ik.q1)
+        val extendPosition = toRevolutions(ik.q1 + ik.q2) - EXTEND_OFFSET
+        val pivotPosition = toRevolutions(Math.PI - ik.q1) - PIVOT_OFFSET
 
         extendMotor.targetPosition = toTicks(extendPosition, EXTEND_TPR)
         pivotMotor.targetPosition = toTicks(pivotPosition, PIVOT_TPR)
@@ -144,6 +142,10 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val EXTEND_TPR: Double = EXTEND_MOTOR_TPR * EXTEND_GEAR_RATIO
         const val PIVOT_TPR: Double = PIVOT_MOTOR_TPR * PIVOT_GEAR_RATIO
         const val ROTATE_TPR: Double = ROTATE_MOTOR_TPR * ROTATE_GEAR_RATIO
+
+        // STARTING POSITIONS
+        const val EXTEND_OFFSET: Double = -15.0 / 360.0
+        const val PIVOT_OFFSET: Double = 20.0 / 360.0
 
         // MISC.
         const val ARM_LENGTH: Double = 17.0 * 2.0
