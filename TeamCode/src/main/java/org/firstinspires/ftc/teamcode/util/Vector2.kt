@@ -4,6 +4,8 @@ import kotlin.math.sqrt
 
 fun vec2(x: Double, y: Double) = Vector2(x, y)
 fun vec2(x: Float, y: Float) = Vector2(x.toDouble(), y.toDouble())
+fun vec2(xy: Double) = vec2(xy, xy)
+fun vec2(xy: Float) = vec2(xy, xy)
 
 data class Vector2(var x: Double, var y: Double) {
     companion object {

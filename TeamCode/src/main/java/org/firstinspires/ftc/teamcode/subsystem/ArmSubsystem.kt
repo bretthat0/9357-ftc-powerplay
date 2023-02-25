@@ -29,7 +29,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     private lateinit var rotateMotor: DcMotorEx
 
     private lateinit var rotateServo: Servo
-    private lateinit var grabServo: Servo
+    private lateinit var grabLeftServo: Servo
+    private lateinit var grabRightServo: Servo
 
     override fun onRegister() {
         extendMotor = hardwareMap.get(DcMotorEx::class.java, "extend_motor")
@@ -37,11 +38,13 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         rotateMotor = hardwareMap.get(DcMotorEx::class.java, "rotate_motor")
 
         rotateServo = hardwareMap.get(Servo::class.java, "rotate_servo")
-        grabServo = hardwareMap.get(Servo::class.java, "grab_servo")
+        grabLeftServo = hardwareMap.get(Servo::class.java, "grab_left_servo")
+        grabRightServo = hardwareMap.get(Servo::class.java, "grab_right_servo")
 
         extendMotor.direction = DcMotorSimple.Direction.REVERSE
         pivotMotor.direction = DcMotorSimple.Direction.REVERSE
         rotateServo.direction = Servo.Direction.REVERSE
+        grabRightServo.direction = Servo.Direction.REVERSE
 
         extendMotor.velocity = 0.0
         pivotMotor.velocity = 0.0
@@ -104,7 +107,8 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
     private fun claw() {
         rotateServo.position = wristPosition
-        grabServo.position = if (isGrabbing) 0.4 else 0.0
+        grabLeftServo.position = if (isGrabbing) 0.4 else 0.0
+        grabRightServo.position = if (isGrabbing) 0.4 else 0.0
     }
 
     private fun toRadiansPerSec(factor: Double, rpm: Double): Double = factor * 2 * Math.PI * rpm * 60
@@ -130,7 +134,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
 
         // GEAR RATIO
         const val EXTEND_GEAR_RATIO: Double = 34.0 / 16.0
-        const val PIVOT_GEAR_RATIO: Double = 34.0 / 16.0
+        const val PIVOT_GEAR_RATIO: Double = 1.0 / 1.0 //34.0 / 16.0
         const val ROTATE_GEAR_RATIO: Double = 2.0 / 1.0
 
         // MOTOR TICKS PER REVOLUTION
