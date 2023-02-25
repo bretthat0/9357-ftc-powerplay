@@ -88,6 +88,10 @@ class DefaultController: ControllerBase() {
                 when (button) {
                     GamepadButton.RB -> slowMode = !slowMode
                     GamepadButton.RS -> armSubsystem.toggleMode()
+                    GamepadButton.DPAD_UP -> armSubsystem.planePosition = vec2(4.0, 32.0)
+                    GamepadButton.DPAD_DOWN -> armSubsystem.planePosition = vec2(4.0, 0.0)
+                    GamepadButton.DPAD_RIGHT -> armSubsystem.rotatePosition += 0.5
+                    GamepadButton.DPAD_LEFT -> armSubsystem.rotatePosition -= 0.5
                     else -> {}
                 }
             }
