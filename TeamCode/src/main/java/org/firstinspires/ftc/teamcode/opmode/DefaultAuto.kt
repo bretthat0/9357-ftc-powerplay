@@ -26,9 +26,8 @@ open class DefaultAuto: AutoBase() {
         armSubsystem = ArmSubsystem(hardwareMap)
         visionSubsystem = VisionSubsystem(hardwareMap)
 
-        armSubsystem.mode = ArmSubsystem.Mode.Manual
-
         register(driveSubsystem)
+        //register(armSubsystem)
         register(visionSubsystem)
     }
 
@@ -50,12 +49,23 @@ open class DefaultAuto: AutoBase() {
     }
 
     protected open suspend fun executeInstructions() {
+        /*drive(Direction.FORWARD, 0.25)
+        positionTurret(60)
+        drive(Direction.FORWARD, 1.0)
+        positionTurret(-60)
+        positionArm(16.0, 5.0)
+        claw(true)
+        positionArm(16.0, 28.0)
+        positionTurret(150)
+        claw(false)
+        positionArm(4.0, 4.0)*/
+
         when (tagId) {
             0 -> drive(Direction.LEFT, 1.0)
             2 -> drive(Direction.RIGHT, 1.0)
         }
 
-        drive(Direction.FORWARD, 0.5)
+        drive(Direction.FORWARD, 1.0)
     }
 
     protected suspend fun drive(direction: Direction, seconds: Double) {
@@ -65,22 +75,24 @@ open class DefaultAuto: AutoBase() {
         driveSubsystem.leftInput = Vector2.zero
         driveSubsystem.execute()
     }
-    /*
+
     protected suspend fun claw(grabbing: Boolean) {
         armSubsystem.isGrabbing = grabbing
+        armSubsystem.execute()
         wait(0.5)
     }
 
-    protected suspend fun positionArm(pivotDegrees: Int, extendDegrees: Int) {
-        armSubsystem.pivotPosition = pivotDegrees / 360.0
-        armSubsystem.extendPosition = extendDegrees / 360.0
+    protected suspend fun positionArm(positionX: Double, positionY: Double) {
+        armSubsystem.planePosition = vec2(positionX, positionY)
+        armSubsystem.execute()
         wait(2.0)
     }
 
     protected suspend fun positionTurret(rotateDegrees: Int) {
         armSubsystem.rotatePosition = rotateDegrees / 360.0
+        armSubsystem.execute()
         wait(2.0)
-    }*/
+    }
 
     protected fun vec2(dir: Direction): Vector2 {
         return when (dir) {

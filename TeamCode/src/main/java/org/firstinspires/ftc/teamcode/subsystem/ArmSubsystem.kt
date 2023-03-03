@@ -18,7 +18,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
     var manualPosition = Vector2.zero
     var rotatePosition = 0.0
 
-    var wristPosition = 0.0
+    var wristPosition = 0.5
     var isGrabbing = false
 
     private var debugQ1 = 0.0
@@ -133,7 +133,7 @@ class ArmSubsystem(private var hardwareMap: HardwareMap): SubsystemBase() {
         const val MAX_ROTATE_SPEED: Double = 1.0
 
         // GEAR RATIO
-        const val EXTEND_GEAR_RATIO: Double = 34.0 / 16.0
+        const val EXTEND_GEAR_RATIO: Double = 1.0 / 1.0 //34.0 / 16.0
         const val PIVOT_GEAR_RATIO: Double = 1.0 / 1.0 //34.0 / 16.0
         const val ROTATE_GEAR_RATIO: Double = 2.0 / 1.0
 

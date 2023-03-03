@@ -65,8 +65,8 @@ class DefaultController: ControllerBase() {
 
         // TODO: Make this more robust
         armSubsystem.planePosition.clampMagnitude(ArmSubsystem.ARM_LENGTH)
-        armSubsystem.planePosition = clamp(armSubsystem.planePosition, vec2(1.0, -2.0), vec2(ArmSubsystem.ARM_LENGTH))
-        armSubsystem.wristPosition = clamp(armSubsystem.wristPosition, -0.3, 1.0)
+        armSubsystem.planePosition = clamp(armSubsystem.planePosition, vec2(1.0, -2.0), Vector2.inf)
+        armSubsystem.wristPosition = clamp(armSubsystem.wristPosition, 0.0, 1.0)
     }
 
     private fun inputDelta(x: Double): Double {
